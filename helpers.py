@@ -37,7 +37,20 @@ def loadHistoFromFile(fileName,histName,rebin):
 	result.Rebin(rebin)
 	result.SetDirectory(0)	
 	return result
-	
+
+
+def readTreeFromFile(path):
+	from ROOT import TChain
+	result = TChain()
+	result.Add("%s/SimpleNtupler/t"%path)
+	return result	
+
+def readTrees(path):
+	result = {}
+	for sampleName, filePath in getFilePathsAndSampleNames(path).iteritems():
+		result[sampleName] = readTreeFromFile(filePath)
+	print result	
+	return result
 
 def getFilePathsAndSampleNames(path):
 	"""
@@ -57,6 +70,35 @@ def getFilePathsAndSampleNames(path):
 			result[sampleName] = filePath
 	return result
 
+
+def getHistoFromTree(tree,plot,nEvents = -1):
+
+	from ROOT import TH1F
+	from random import randint
+	from sys import maxint
+	if nEvents < 0:
+		nEvents = maxint
+	#make a random name you could give something meaningfull here,
+	#but that would make this less readable
+
+	
+
+	name = "%x"%(randint(0, maxint))
+	if plot.binning == []:
+		result = TH1F(name, "", plot.nBins, plot.xMin, plot.xMax)
+	else:
+		result = TH1F(name, "", len(plot.binning)-1, array("f",plot.binning))
+		
+	result.Sumw2()
+	tree.Draw("%s>>%s"%(plot.variable, name), plot.cut, "goff", nEvents)
+	
+	result.SetBinContent(plot.nBins,result.GetBinContent(plot.nBins)+result.GetBinContent(plot.nBins+1))
+	if result.GetBinContent(plot.nBins) >= 0.:
+		result.SetBinError(plot.nBins,sqrt(result.GetBinContent(plot.nBins)))
+	else:
+		result.SetBinError(plot.nBins,0)
+
+	return result
 
 	
 
@@ -98,11 +140,16 @@ class Process:
 			self.nEvents.append(counts[sample])
 
 		
-	def loadHistogram(self,lumi,files,plot):
+	def loadHistogram(self,lumi,files,plot,fromTree):
 		
 		for index, sample in enumerate(self.samples):
-			tempHist = loadHistoFromFile(files[sample],plot.histName,plot.rebin)		
+			if fromTree:
+				tempHist = getHistoFromTree(files[sample],plot)
+			else:
+				tempHist = loadHistoFromFile(files[sample],plot.histName,plot.rebin)
 			tempHist.Scale(lumi*self.xsecs[index]/self.nEvents[index])
+			print sample
+			print lumi*self.xsecs[index]/self.nEvents[index], lumi, self.xsecs[index], self.nEvents[index]
 			if self.histo == None:
 				self.histo = tempHist.Clone()
 			else:	
@@ -119,11 +166,11 @@ class TheStack:
 	from ROOT import THStack
 	theStack = THStack()	
 	theHistogram = None	
-	def  __init__(self,processes,lumi,plot,files):
+	def  __init__(self,processes,lumi,plot,files,fromTree=False):
 		self.theStack = THStack()
 			
 		for process in processes:
-			temphist = process.loadHistogram(lumi,files,plot)
+			temphist = process.loadHistogram(lumi,files,plot,fromTree)
 
 			self.theStack.Add(temphist.Clone())
 			if self.theHistogram == None:
@@ -131,8 +178,11 @@ class TheStack:
 			else:	
 				self.theHistogram.Add(temphist.Clone())
 
-def getDataHist(plot,files):
-	histo = loadHistoFromFile(files["data"], plot.histName,plot.rebin)
+def getDataHist(plot,files,fromTree=False):
+	if not fromTree:
+		histo = loadHistoFromFile(files["data"], plot.histName,plot.rebin)
+	else:
+		histo = getHistoFromTree(files["data"], plot)
 	return histo	
 
 

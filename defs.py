@@ -63,6 +63,15 @@ crossSections = {
 "qcd2400to3200":0.00682981,
 "qcd3200":0.000165445,
 
+
+"DYTo2Mu_M300":0.562538, #Value needs to be replaced by correct one.
+
+"CITo2Mu_Lam22TeVConLL":0.3637,
+"CITo2Mu_Lam22TeVConLR":0.7486,
+"CITo2Mu_Lam22TeVConRR":0.3737,
+"CITo2Mu_Lam22TeVDesLL":0.3551,
+"CITo2Mu_Lam22TeVDesLR":0.7283,
+"CITo2Mu_Lam22TeVDesRR":0.3629,
 }	
 	
 	
@@ -79,6 +88,60 @@ class Signals:
 		additionalSelection = None 	
 
 		
+	class CITo2Mu_Lam22TeVConLL:
+		subprocesses = ["CITo2Mu_Lam22TeVConLL"]
+		label = "CITo2Mu_Lam22TeVConLL"		#"CI #rightarrow #mu^{+}#mu^{-} #Lambda 22 TeV - Con LL"
+		fillcolor = ROOT.kWhite
+		fillstyle = 0
+		linecolor = ROOT.kAzure+1
+		uncertainty = 0.0
+		scaleFac     = 1.	
+		additionalSelection = None
+	class CITo2Mu_Lam22TeVConLR:
+		subprocesses = ["CITo2Mu_Lam22TeVConLR"]
+		label = "CITo2Mu_Lam22TeVConLR"		#"CI #rightarrow #mu^{+}#mu^{-} #Lambda 22 TeV - Con LR"
+		fillcolor = ROOT.kWhite
+		fillstyle = 0
+		linecolor = ROOT.kRed-4
+		uncertainty = 0.0
+		scaleFac     = 1.	
+		additionalSelection = None
+	class CITo2Mu_Lam22TeVConRR:
+		subprocesses = ["CITo2Mu_Lam22TeVConRR"]
+		label = "CITo2Mu_Lam22TeVConRR"		#"CI #rightarrow #mu^{+}#mu^{-} #Lambda 22 TeV - Con RR"
+		fillcolor = ROOT.kWhite
+		fillstyle = 0
+		linecolor = ROOT.kYellow
+		uncertainty = 0.0
+		scaleFac     = 1.	
+		additionalSelection = None
+	class CITo2Mu_Lam22TeVDesLL:
+		subprocesses = ["CITo2Mu_Lam22TeVDesLL"]
+		label = "CITo2Mu_Lam22TeVDesLL"		#"CI #rightarrow #mu^{+}#mu^{-} #Lambda 22 TeV - Des LL"
+		fillcolor = ROOT.kWhite
+		fillstyle = 0
+		linecolor = ROOT.kBlue+1
+		uncertainty = 0.0
+		scaleFac     = 1.	
+		additionalSelection = None
+	class CITo2Mu_Lam22TeVDesLR:
+		subprocesses = ["CITo2Mu_Lam22TeVDesLR"]
+		label = "CITo2Mu_Lam22TeVDesLR"		#"CI #rightarrow #mu^{+}#mu^{-} #Lambda 22 TeV - Des LR"
+		fillcolor = ROOT.kWhite
+		fillstyle = 0
+		linecolor = ROOT.kGreen+1
+		uncertainty = 0.0
+		scaleFac     = 1.	
+		additionalSelection = None
+	class CITo2Mu_Lam22TeVDesRR:
+		subprocesses = ["CITo2Mu_Lam22TeVDesRR"]
+		label = "CITo2Mu_Lam22TeVDesRR"		#"CI #rightarrow #mu^{+}#mu^{-} #Lambda 22 TeV - Des RR"
+		fillcolor = ROOT.kWhite
+		fillstyle = 0
+		linecolor = ROOT.kMagenta+1
+		uncertainty = 0.0
+		scaleFac     = 1.	
+		additionalSelection = None
 		
 		
 		
@@ -109,7 +172,15 @@ class Backgrounds:
 		scaleFac     = 1.	
 		additionalSelection = None
 
-
+	class DYTo2Mu_M300:
+		subprocesses = ["DYTo2Mu_M300"]
+		label = "#gamma/Z #rightarrow #mu^{+}#mu^{-} New"
+		fillcolor = ROOT.kAzure+1
+		fillstyle = 1001#3315
+		linecolor = ROOT.kAzure+1 #ROOT.kBlack	
+		uncertainty = 0.04
+		scaleFac     = 1.	
+		additionalSelection = None
 
 
 # Color definition
@@ -168,24 +239,32 @@ class Plot:
 	plotName = "none"
 	xaxis   = "none"
 	yaxis	= "none"
+	cut = ""
+	variable = ""
 	xMin = 0
 	xMax = 0
+	nBins = 0
+	binning = []
 	yMin 	= 0
 	yMax	= 0 
 	rebin = 1
 	fileName = "none.pdf"
 	log = False
 	
-	def __init__(self,histName,plotName, yRange = None, xRange = None, xLabel = "", yLabel = "",log=False,rebin = None):
+	def __init__(self,histName,plotName, yRange = None, xRange = None, nBins = 0, xLabel = "", yLabel = "",log=False,rebin = None, binning = [], cuts = "", variable = ""):
 		self.histName=histName
 		self.xaxis=xLabel
 		self.yaxis=yLabel
+		self.nBins = nBins
+		self.binning = binning
 		self.xMin= None
 		self.xMax= None
 		self.yMin= None
 		self.yMax= None
 		self.plotName = plotName
 		self.fileName= plotName
+		self.cut = cuts
+		self.variable = variable
 		if rebin != None:
 			self.rebin = rebin
 		if log:
@@ -202,4 +281,4 @@ class Plot:
 
 class plots:
 	
-	massPlot = Plot("DimuonMassVertexConstrained","DimuonMass",xLabel="dimuon mass [GeV]",log=True,xRange=[0,4000],rebin=40,yLabel="Events / 40 GeV")
+	massPlot = Plot("DimuonMassVertexConstrained","DimuonMass",xLabel="dimuon mass [GeV]",log=True,xRange=[0,4000],nBins = 100, rebin=40,yLabel="Events / 40 GeV", cuts = "", variable = "dil_mass")
